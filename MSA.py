@@ -77,11 +77,11 @@ def transform_stiffness(T_base, T_global, q_passive, links):
 space_x = space_y = space_z = 1.0  # workspace size
 L = 1.0  # condition
 links = np.array([L, L])  # links lengths
-l = 0.1  # condition (platform link 8-e)
+l = 0.0  # condition (platform link 8-e)
 d = 0.2  # assumption (diameter)
 
 ang60 = np.pi / 3  # 60 deg
-IK_disp = [[-l, 0.0], [l * np.cos(ang60), l * np.sin(ang60)], [l * np.cos(ang60), l * np.sin(-ang60)]]
+IK_disp = [[l * np.cos(ang60), l * np.sin(ang60)], [l * np.cos(ang60), l * np.sin(-ang60)], [-l, 0.0]]
 
 K_active = 1e6  # assumption (from paper)
 E = 69 * 1e9  # Young's modulus https://en.wikipedia.org/wiki/Young%27s_modulus
