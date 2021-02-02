@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matrices import *
 
 
-def ikLeg(T_base, T_global, links, IK_disp):
+def IK_leg(T_base, T_global, links, IK_disp):
     T_global[0] -= IK_disp[0]
     T_global[1] -= IK_disp[1]
     R_base = T_base[0:3, 0:3]
@@ -20,14 +20,14 @@ def ikLeg(T_base, T_global, links, IK_disp):
     return np.array([q1, q2, q3])
 
 
-def ik_tripteron(T_base, T_global, links, IK_disp):
+def IK_tripteron(T_base, T_global, links, IK_disp):
     """
     :return: list of legs' states
     """
 
     q = []
     for leg in range(len(T_base)):
-        q_leg = ikLeg(T_base[leg], T_global, links, IK_disp[leg])
+        q_leg = IK_leg(T_base[leg], T_global, links, IK_disp[leg])
         q.append(q_leg)
     return q
 
@@ -77,7 +77,7 @@ def transform_stiffness(T_base, T_global, q_passive, links):
 space_x = space_y = space_z = 1.0  # workspace size
 L = 1.0  # condition
 links = np.array([L, L])  # links lengths
-l = 0.0  # condition (platform link 8-e)
+l = 0.1  # condition (platform link 8-e)
 d = 0.2  # assumption (diameter)
 
 ang60 = np.pi / 3  # 60 deg
@@ -310,7 +310,7 @@ for z in np.arange(start, space_z + start, step_z):
         for y in np.arange(start, space_y + start, step):
             T_global = np.array([x, y, z])
 
-            q_passive = ik_tripteron(T_base, T_global, links, IK_disp)
+            q_passive = IK_tripteron(T_base, T_global, links, IK_disp)
 
             Q = transform_stiffness(T_base, T_global, q_passive, links)
 
