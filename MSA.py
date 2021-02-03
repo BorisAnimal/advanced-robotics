@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matrices import *
 from IK import IK_tripteron
+from common_params import *
 
 
 def plot_deflection(x, y, z, deflection):
@@ -45,27 +46,6 @@ def transform_stiffness(T_base, T_global, q_passive, links):
     return Q
 
 
-########################## Params ##########################
-space_x = space_y = space_z = 1.0  # workspace size
-L = 1.0  # condition
-links = np.array([L, L])  # links lengths
-l = 0.1  # condition (platform link 8-e)
-d = 0.2  # assumption (diameter)
-
-ang60 = np.pi / 3  # 60 deg
-IK_disp = [[l * np.cos(ang60), l * np.sin(ang60)], [l * np.cos(ang60), l * np.sin(-ang60)], [-l, 0.0]]
-
-K_active = 1e6  # assumption (from paper)
-E = 69 * 1e9  # Young's modulus https://en.wikipedia.org/wiki/Young%27s_modulus
-G = 25.5 * 1e9  # shear modulus
-
-S = np.pi * (d ** 2) / 4
-Iy = np.pi * (d ** 4) / 64
-Iz = np.pi * (d ** 4) / 64
-J = Iy + Iz
-
-F = np.array([0, 0, 100, 0, 0, 0]).reshape((-1, 1))
-
 K11 = np.array([
     [E * S / L, 0, 0, 0, 0, 0],
     [0, 12 * E * Iz / L ** 3, 0, 0, 0, 6 * E * Iz / L ** 2],
@@ -92,16 +72,6 @@ K22 = np.array([
     [0, 0, 6 * E * Iy / L ** 2, 0, 4 * E * Iy / L, 0],
     [0, -6 * E * Iz / L ** 2, 0, 0, 0, 4 * E * Iz / L]
 ])
-
-T_base_z = np.eye(4)  # Also global origin
-T_base_y = np.linalg.multi_dot([Tz(space_z), Rx(-np.pi / 2)])
-T_base_x = np.linalg.multi_dot([Ty(space_y), Ry(np.pi / 2), Rz(np.pi)])
-T_base = [T_base_x, T_base_y, T_base_z]
-
-T_tool_z = np.eye(4)
-T_tool_y = np.transpose(Rx(-np.pi / 2))
-T_tool_x = np.transpose(np.linalg.multi_dot([Ry(np.pi / 2), Rz(np.pi)]))
-T_tool = [T_tool_x, T_tool_y, T_tool_z]
 
 
 def Kc_tripteron_MSA(Q, IK_disp, K11, K12, K21, K22, lambda_e_12, lambda_r_12, lambda_r_34, lambda_r_56, lambda_r_78,
@@ -270,9 +240,6 @@ yScatter = np.array([])
 zScatter = np.array([])
 dScatter = np.array([])
 
-start = 0.01
-step = 0.1
-step_z = 0.1
 for z in np.arange(start, space_z + start, step_z):
     xData = np.array([])
     yData = np.array([])

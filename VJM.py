@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matrices import *
 from jacobians import jacobian_passive_tripteron, jacobian_theta_tripteron
 from IK import IK_tripteron
+from common_params import *
 
 
 def K_theta_leg(K_active, E, G, L):
@@ -27,12 +28,12 @@ def K_theta_leg(K_active, E, G, L):
     return K
 
 
-def Kc_tripteron_VJM(Ktheta, Jq, Jtheta):
+def Kc_tripteron_VJM(K_theta, J_q, J_theta):
     Kc_total = []
-    for i in range(len(Ktheta)):
-        Kc0 = np.linalg.inv(np.linalg.multi_dot([Jtheta[i], np.linalg.inv(Ktheta[i]), np.transpose(Jtheta[i])]))
+    for i in range(len(K_theta)):
+        Kc0 = np.linalg.inv(np.linalg.multi_dot([J_theta[i], np.linalg.inv(K_theta[i]), np.transpose(J_theta[i])]))
         Kc = Kc0 - np.linalg.multi_dot(
-            [Kc0, Jq[i], np.linalg.inv(np.linalg.multi_dot([np.transpose(Jq[i]), Kc0, Jq[i]])), np.transpose(Jq[i]),
+            [Kc0, J_q[i], np.linalg.inv(np.linalg.multi_dot([np.transpose(J_q[i]), Kc0, J_q[i]])), np.transpose(J_q[i]),
              Kc0])
         Kc_total.append(Kc)
 
@@ -53,40 +54,6 @@ def plot_deflection(x, y, z, deflection):
     plt.show()
 
 
-########################## Params ##########################
-space_x = space_y = space_z = 1.0  # workspace size
-L = 1.0  # condition
-links = np.array([L, L])  # links lengths
-l = 0.1  # condition (platform link 8-e)
-d = 0.2  # assumption (diameter)
-
-ang60 = np.pi / 3  # 60 deg
-IK_disp = [[l * np.cos(ang60), l * np.sin(ang60)], [l * np.cos(ang60), l * np.sin(-ang60)], [-l, 0.0]]
-
-K_active = 1e6  # assumption (from paper)
-E = 69 * 1e9  # Young's modulus https://en.wikipedia.org/wiki/Young%27s_modulus
-G = 25.5 * 1e9  # shear modulus
-
-S = np.pi * (d ** 2) / 4
-Iy = np.pi * (d ** 4) / 64
-Iz = np.pi * (d ** 4) / 64
-J = Iy + Iz
-
-F = np.array([0, 0, 100, 0, 0, 0]).reshape((-1, 1))
-
-T_base_z = np.eye(4)  # Also global origin
-T_base_y = np.linalg.multi_dot([Tz(space_z), Rx(-np.pi / 2)])
-T_base_x = np.linalg.multi_dot([Ty(space_y), Ry(np.pi / 2), Rz(np.pi)])
-T_base = [T_base_x, T_base_y, T_base_z]
-
-T_tool_z = np.eye(4)
-T_tool_y = np.transpose(Rx(-np.pi / 2))
-T_tool_x = np.transpose(np.linalg.multi_dot([Ry(np.pi / 2), Rz(np.pi)]))
-T_tool = [T_tool_x, T_tool_y, T_tool_z]
-
-theta = np.zeros(13)
-theta = [theta, theta, theta]
-
 Ktheta = K_theta_leg(K_active, E, G, L)
 Ktheta = [Ktheta, Ktheta, Ktheta]
 
@@ -95,9 +62,6 @@ yScatter = np.array([])
 zScatter = np.array([])
 dScatter = np.array([])
 
-start = 0.01
-step = 0.1
-step_z = 0.1
 for z in np.arange(start, space_z + start, step_z):
     xData = np.array([])
     yData = np.array([])
@@ -109,8 +73,8 @@ for z in np.arange(start, space_z + start, step_z):
             q_active = [[T_global[0]], [T_global[1]], [T_global[2]]]
             q_passive = IK_tripteron(T_base, T_global, links, IK_disp)
 
-            Jq = jacobian_passive_tripteron(T_base, T_tool, q_active, q_passive, theta, links, l)
-            Jtheta = jacobian_theta_tripteron(T_base, T_tool, q_active, q_passive, theta, links, l)
+            Jq = jacobian_passive_tripteron(T_base, T_tool, q_active, q_passive, theta, links, IK_disp)
+            Jtheta = jacobian_theta_tripteron(T_base, T_tool, q_active, q_passive, theta, links, IK_disp)
 
             Kc = Kc_tripteron_VJM(Ktheta, Jq, Jtheta)
 

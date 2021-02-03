@@ -2,8 +2,8 @@ import numpy as np
 
 
 def IK_leg(T_base, T_global, links, IK_disp):
-    T_global[0] -= IK_disp[0]
-    T_global[1] -= IK_disp[1]
+    T_global[0] += IK_disp[0]
+    T_global[1] += IK_disp[1]
     R_base = T_base[0:3, 0:3]
     T_base = T_base[0:3, 3]
     T_local = np.transpose(R_base).dot(T_global - T_base)
