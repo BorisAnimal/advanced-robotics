@@ -3,21 +3,21 @@
 ## MSA
 Result with platform link modeling:
 
-![](https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/stiffness_z.png =400x)
+<img src="https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/stiffness_z.png" height="300">
 
 
 Result without platform link modeling:
 
-![](https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/stiffness_z_without_platform.png =400x)
+<img src="https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/stiffness_z_without_platform.png" height="300">
 
 ## VJM:
 
 Result with platform link modeling:
 
-![](https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/vjm_z.png =400x)
+<img src="https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/vjm_z.png" height="300">
 
 ## Difference:
 
 Difference MSA - VJM when ```l=0.1 m``` (with platform rigid link). See ```diff.py```
 
-![](https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/diff_z_l=0,1.png =400x)
+<img src="https://github.com/BorisAnimal/advanced-robotics/blob/main/imgs/diff_z_l=0,1.png" height="300">
