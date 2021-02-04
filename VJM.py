@@ -34,7 +34,8 @@ def Kc_tripteron_VJM(K_theta, J_q, J_theta):
         Kc0 = np.linalg.inv(np.linalg.multi_dot([J_theta[i], np.linalg.inv(K_theta[i]), np.transpose(J_theta[i])]))
         Kc = Kc0 - np.linalg.multi_dot(
             [Kc0, J_q[i], np.linalg.inv(np.linalg.multi_dot([np.transpose(J_q[i]), Kc0, J_q[i]])), np.transpose(J_q[i]),
-             Kc0])
+             np.linalg.inv(Kc0)
+             ])
         Kc_total.append(Kc)
 
     Kc_total = Kc_total[0] + Kc_total[1] + Kc_total[2]
