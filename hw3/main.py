@@ -85,12 +85,15 @@ def jacobian_theta(q, theta, links):
 
 ##################### PARAMS #####################
 np.random.seed(42)
+use_noise = False
 links = np.array([0.4, 0.0, 0.1])
-# theta = np.array([0.01, -0.001, 0.06])  # Geometric errors
 theta = np.array([0.0, 0.0, 0.0])
+# theta = np.array([0.01, -0.001, 0.06])  # Geometric errors
 
 Kc = np.array([1e6, 2e6, 0.5e6])
 Kc = np.diag(Kc)
+
+print(Kc)
 
 ##################### TESTS #####################
 q = np.array([1.0, 2.0, 3.0])
@@ -111,7 +114,8 @@ if __name__ == '__main__':
 
         J_theta = jacobian_theta(q, theta, links)
         dt = np.linalg.multi_dot([J_theta, np.linalg.inv(Kc), np.transpose(J_theta), W])
-        # dt += np.random.normal(loc=0.0, scale=1e-5)  # measurements noise
+        if use_noise:
+            dt += np.random.normal(loc=0.0, scale=1e-5)  # measurements noise
 
         J_theta = J_theta[0:3, :]
         dt = dt[0:3]
@@ -129,8 +133,10 @@ if __name__ == '__main__':
     Kc = np.diag(np.divide(1.0, dX))  # final stiffness matrix
     # Kc = np.linalg.inv(np.diag(dX))  # Sometimes gives too big error in compare with upper code
 
+    print(Kc)
+
     # Plotting calculations
-    W = np.array([-22.0, 100.0, -1234.0, 0.0, 0.0, 0.0])
+    W = np.array([-220.0, 100.0, -1234.0, 0.0, 0.0, 0.0])
 
     r = 0.1
     xc = 1.1
@@ -144,15 +150,16 @@ if __name__ == '__main__':
     Z = zc * np.ones(points)
     traj_desired = np.stack([X, Y, Z])
 
-    jointStates = np.zeros((3, points), dtype=float)
+    joint_states = np.zeros((3, points), dtype=float)
     for i in range(points):
-        jointStates[:, i] = ik([X[i], Y[i], Z[i]], links)
+        joint_states[:, i] = ik([X[i], Y[i], Z[i]], links)
 
     traj_uncalibrated = np.zeros(traj_desired.shape, dtype=float)
     for i in range(points):
-        J_theta = jacobian_theta(jointStates[:, i], theta, links)
+        J_theta = jacobian_theta(joint_states[:, i], theta, links)
         dt = np.linalg.multi_dot([J_theta, np.linalg.inv(Kc), np.transpose(J_theta), W])
-        # dt += np.random.normal(loc=0.0, scale=1e-5)  # measurements noise
+        if use_noise:
+            dt += np.random.normal(loc=0.0, scale=1e-5)  # measurements noise
 
         traj_uncalibrated[:, i] = traj_desired[:, i] + dt[0:3]
 
@@ -161,15 +168,17 @@ if __name__ == '__main__':
 
     for i in range(points):
         tool = np.array([traj_updated[0, i], traj_updated[1, i], traj_updated[2, i]])
-        jointStates[:, i] = ik(tool, links)
+        joint_states[:, i] = ik(tool, links)
 
     traj_calibrated = np.zeros(traj_desired.shape, dtype=float)
     for i in range(points):
-        J_theta = jacobian_theta(jointStates[:, i], theta, links)
+        J_theta = jacobian_theta(joint_states[:, i], theta, links)
         dt = np.linalg.multi_dot([J_theta, np.linalg.inv(Kc), np.transpose(J_theta), W])
-        # dt += np.random.normal(loc=0.0, scale=1e-5)  # measurements noise
 
         traj_calibrated[:, i] = traj_updated[:, i] + dt[0:3]
+
+    max_error = np.linalg.norm(traj_calibrated - traj_desired, 2, 0).max()
+    print("Maximum error amplitude: {:.2f} nm".format(max_error * 1e9))
 
     # Plotting results
     fig = plt.figure(figsize=(9, 6))
