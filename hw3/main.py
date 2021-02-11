@@ -130,10 +130,10 @@ if __name__ == '__main__':
         dX_2 = dX_2 + np.transpose(B).dot(dt)
 
     dX = np.linalg.inv(dX_1).dot(dX_2)
-    Kc = np.diag(np.divide(1.0, dX))  # final stiffness matrix
-    # Kc = np.linalg.inv(np.diag(dX))  # Sometimes gives too big error in compare with upper code
+    Kc_calibrated = np.diag(np.divide(1.0, dX))  # final stiffness matrix
+    # Kc_calibrated = np.linalg.inv(np.diag(dX))  # Sometimes gives too big error in compare with upper code
 
-    print(Kc)
+    print(Kc_calibrated)
 
     # Plotting calculations
     W = np.array([-220.0, 100.0, -1234.0, 0.0, 0.0, 0.0])
@@ -173,12 +173,12 @@ if __name__ == '__main__':
     traj_calibrated = np.zeros(traj_desired.shape, dtype=float)
     for i in range(points):
         J_theta = jacobian_theta(joint_states[:, i], theta, links)
-        dt = np.linalg.multi_dot([J_theta, np.linalg.inv(Kc), np.transpose(J_theta), W])
+        dt = np.linalg.multi_dot([J_theta, np.linalg.inv(Kc_calibrated), np.transpose(J_theta), W])
 
         traj_calibrated[:, i] = traj_updated[:, i] + dt[0:3]
 
     max_error = np.linalg.norm(traj_calibrated - traj_desired, 2, 0).max()
-    print("Maximum error amplitude: {:.2f} nm".format(max_error * 1e9))
+    print("Maximum error amplitude: {:.2f} mcm".format(max_error * 1e6))
 
     # Plotting results
     fig = plt.figure(figsize=(9, 6))

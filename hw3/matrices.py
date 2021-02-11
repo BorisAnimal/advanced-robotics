@@ -57,7 +57,7 @@ def Tx(x):
     return T
 
 
-def dTx(x):
+def dTx(x=None):
     T = np.array([[0, 0, 0, 1],
                   [0, 0, 0, 0],
                   [0, 0, 0, 0],
@@ -73,7 +73,7 @@ def Ty(y):
     return T
 
 
-def dTy(y):
+def dTy(y=None):
     T = np.array([[0, 0, 0, 0],
                   [0, 0, 0, 1],
                   [0, 0, 0, 0],
@@ -89,7 +89,7 @@ def Tz(z):
     return T
 
 
-def dTz(z):
+def dTz(z=None):
     T = np.array([[0, 0, 0, 0],
                   [0, 0, 0, 0],
                   [0, 0, 0, 1],
