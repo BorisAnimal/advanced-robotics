@@ -444,7 +444,7 @@ def task_priority(q, links, xyf_target):
         del_e = update_fraction(get_difference(xyf_0, xyf_target),10)
 
         J = jacobian(q, links)
-        J_1 = J
+        J_1 = J[:3,:]
         J_2 = J[3:5,:].reshape((2,-1))
         J_psevd_1 = np.linalg.multi_dot([
             J_1.T,
@@ -462,8 +462,9 @@ def task_priority(q, links, xyf_target):
         ])
 
         psi, theta, phi = euler_angles_from_rotation_matrix(fk(q,links))
-        d_psi = (-90 - psi + 3 * 180) % (2 * 180) - 180
-        d_theta = (-90 - theta + 3* 180)%(2*180) - 180
+        d_psi = (0 - psi + 3 * 180) % (2 * 180) - 180
+        # d_theta = (-90 - theta + 3* 180)%(2*180) - 180
+        d_theta = (0 - theta + 3* 180)%(2*180) - 180
         rot = np.vstack([d_psi, d_theta])
         rot = update_fraction_ang(rot, 5)
 
@@ -471,10 +472,10 @@ def task_priority(q, links, xyf_target):
             np.linalg.multi_dot([
             J_2,
             J_psevd_1,
-            del_e
+            del_e[:3,:]
             ])
 
-        d_q_0 = J_psevd_1.dot(del_e)
+        d_q_0 = J_psevd_1.dot(del_e[:3,:])
         d_q_0 = update_dq(d_q_0, d_q_max)
 
         d_q_1 = np.linalg.multi_dot([
@@ -533,7 +534,7 @@ if __name__ == '__main__':
         np.array([[2734.22], [305.74], [1648.2], [0], [0], [0]]),
     ]
 
-
+    drop = False
     for xyf_target in xyf_targets:
         q_old = q
         # q = pseudoinverse(q, links, xyf_target, W=W)
@@ -541,7 +542,10 @@ if __name__ == '__main__':
         # q = null_space(q_old, links, xyf_target)
         q = task_priority(q, links, xyf_target)
 
-        logs += q
+        if drop:
+            drop = False
+        else:
+            logs += q
         # break
         q = q[-1] if len(q) > 0 else q_old
     print(len(logs))
@@ -556,7 +560,7 @@ if __name__ == '__main__':
     # plt.savefig('pseudoinverse_general.png')
     # plt.savefig('dls_general.png')
     # plt.savefig('null_space_general.png')
-    # plt.savefig('task_priority_general.png')
+    plt.savefig('task_priority_general.png')
     plt.show()
 
     px = []
@@ -575,7 +579,7 @@ if __name__ == '__main__':
     # plt.savefig('pseudoinverse_path.png')
     # plt.savefig('dls_path.png')
     # plt.savefig('null_space_path.png')
-    # plt.savefig('task_priority_path.png')
+    plt.savefig('task_priority_path.png')
 
     plt.show()
 
